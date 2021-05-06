@@ -1,8 +1,8 @@
 ENGINE=${ENGINE:-podman}
-KUBE_BURNER_RELEASE_URL=${KUBE_BURNER_RELEASE_URL:-https://github.com/cloud-bulldozer/kube-burner/releases/download/v0.9.1/kube-burner-0.9.1-Linux-x86_64.tar.gz}
+KUBE_BURNER_RELEASE_URL=${KUBE_BURNER_RELEASE_URL:-https://github.com/cloud-bulldozer/kube-burner/releases/download/v0.9.1/kube-burner-0.9.1-Linux-ppc64.tar.gz}
 INFRA_TEMPLATE=http-perf.yml.tmpl
 INFRA_CONFIG=http-perf.yml
-KUBE_BURNER_IMAGE=quay.io/cloud-bulldozer/kube-burner:latest
+KUBE_BURNER_IMAGE=quay.io/piyushgupta1551/kube-burner:latest
 URL_PATH=${URL_PATH:-"/1024.html"}
 TERMINATIONS=${TERMINATIONS:-"http edge passthrough reencrypt mix"}
 KEEPALIVE_REQUESTS=${KEEPALIVE_REQUESTS:-"0 1 50"}
