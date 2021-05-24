@@ -12,7 +12,7 @@ THROUGHPUT_TOLERANCE=${THROUGHPUT_TOLERANCE:-5}
 LATENCY_TOLERANCE=${LATENCY_TOLERANCE:-5}
 PREFIX=${PREFIX:-$(oc get clusterversion version -o jsonpath="{.status.desired.version}")}
 LARGE_SCALE_THRESHOLD=${LARGE_SCALE_THRESHOLD:-24}
-METADATA_COLLECTION=${METADATA_COLLECTION:-true}
+METADATA_COLLECTION=${METADATA_COLLECTION:-false}
 NUM_NODES=$(oc get node -l node-role.kubernetes.io/worker --no-headers | grep -cw Ready)
 
 export TLS_REUSE=${TLS_REUSE:-true}
