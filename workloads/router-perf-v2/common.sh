@@ -1,12 +1,12 @@
 ENGINE=${ENGINE:-podman}
-KUBE_BURNER_RELEASE_URL=${KUBE_BURNER_RELEASE_URL:-https://github.com/cloud-bulldozer/kube-burner/releases/download/v0.9.1/kube-burner-0.9.1-Linux-ppc64.tar.gz}
+KUBE_BURNER_RELEASE_URL=${KUBE_BURNER_RELEASE_URL:-https://github.com/cloud-bulldozer/kube-burner/releases/download/v0.9.1/kube-burner-0.9.1-Linux-x86_64.tar.gz}
 INFRA_TEMPLATE=http-perf.yml.tmpl
 INFRA_CONFIG=http-perf.yml
-KUBE_BURNER_IMAGE=quay.io/piyushgupta1551/kube-burner:latest
-URL_PATH=${URL_PATH:-"/1024.html"}
-TERMINATIONS=${TERMINATIONS:-"http edge passthrough reencrypt mix"}
+KUBE_BURNER_IMAGE=quay.io/cloud-bulldozer/kube-burner:latest
+URL_PATH=${URL_PATH:-"1024.html"}
+TERMINATIONS=${TERMINATIONS:-"http edge passthrough reencrypt"}
 KEEPALIVE_REQUESTS=${KEEPALIVE_REQUESTS:-"0 1 50"}
-SAMPLES=${SAMPLES:-2}
+SAMPLES=${SAMPLES:-1}
 QUIET_PERIOD=${QUIET_PERIOD:-60s}
 THROUGHPUT_TOLERANCE=${THROUGHPUT_TOLERANCE:-5}
 LATENCY_TOLERANCE=${LATENCY_TOLERANCE:-5}
@@ -18,14 +18,14 @@ NUM_NODES=$(oc get node -l node-role.kubernetes.io/worker --no-headers | grep -c
 export TLS_REUSE=${TLS_REUSE:-true}
 export UUID=$(uuidgen)
 export RUNTIME=${RUNTIME:-60}
-export ES_SERVER=${ES_SERVER:-https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443}
-export ES_INDEX=${ES_INDEX:-router-test-results}
+#export ES_SERVER=${ES_SERVER:-https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443}
+#export ES_INDEX=${ES_INDEX:-router-test-results}
 export HOST_NETWORK=${HOST_NETWORK:-true}
 export KUBECONFIG=${KUBECONFIG:-~/.kube/config}
 export NODE_SELECTOR=${NODE_SELECTOR:-'{node-role.kubernetes.io/workload: }'}
 export NUMBER_OF_ROUTERS=${NUMBER_OF_ROUTERS:-2}
-export CERBERUS_URL=${CERBERUS_URL}
-export SERVICE_TYPE=${SERVICE_TYPE:-NodePort}
+#export CERBERUS_URL=${CERBERUS_URL}
+export SERVICE_TYPE=${SERVICE_TYPE:-ClusterIP}
 
 if [[ ${COMPARE_WITH_GOLD} == "true" ]]; then
   ES_GOLD=${ES_GOLD:-${ES_SERVER}}
@@ -52,7 +52,7 @@ get_scenario(){
     BASELINE_PREFIX=${LARGE_SCALE_BASELINE_PREFIX:-baseline}
   else
     log "Small scale scenario detected: #workers < ${LARGE_SCALE_THRESHOLD}"
-    export NUMBER_OF_ROUTES=${SMALL_SCALE_ROUTES:-100}
+    export NUMBER_OF_ROUTES=${SMALL_SCALE_ROUTES:-10}
     CLIENTS=${SMALL_SCALE_CLIENTS:-"1 40 200"}
     CLIENTS_MIX=${SMALL_SCALE_CLIENTS_MIX:-"1 20 80"}
     BASELINE_UUID=${SMALL_SCALE_BASELINE_UUID}
@@ -147,7 +147,8 @@ gen_mb_config(){
     local port=443
   fi
   (echo "["
-  while read host; do
+  oc get route -n http-scale-${termination} --no-headers | awk '{print $2}' > /tmp/temp-route-mb.txt
+  while IFS="\n" read host; do
     if [[ ${first} == "true" ]]; then
         echo "{"
         first=false
@@ -167,7 +168,7 @@ gen_mb_config(){
       "keep-alive-requests": '${keepalive_requests}',
       "clients": '${clients}'
     }'
-  done <<< $(oc get route -n http-scale-${termination} --no-headers | awk '{print $2}')
+  done < /tmp/temp-route-mb.txt
   echo "]") | python -m json.tool > http-scale-${termination}.json
 }
 
@@ -183,7 +184,8 @@ gen_mb_mix_config(){
       local scheme=https
       local port=443
     fi
-    while read host; do
+    oc get route -n http-scale-${termination} --no-headers | awk '{print $2}' > /tmp/temp-route-mb-mix.txt
+    while IFS="\n" read host; do
       if [[ ${first} == "true" ]]; then
           echo "{"
           first=false
@@ -203,7 +205,7 @@ gen_mb_mix_config(){
         "keep-alive-requests": '${keepalive_requests}',
         "clients": '${clients}'
       }'
-    done <<< $(oc get route -n http-scale-${mix_termination} --no-headers | awk '{print $2}')
+    done < /tmp/temp-route-mb-mix.txt
   done
   echo "]") | python -m json.tool > http-scale-mix.json
 }
@@ -215,8 +217,9 @@ test_routes(){
     if [[ ${termination} == "http" ]]; then
       local scheme="http://"
     fi
-    while read host; do
+    oc get route -n http-scale-${termination} --no-headers | awk '{print $2}' > /tmp/temp-route.txt
+    while IFS="\n" read host; do
       curl --retry 3 --connect-timeout 5 -sSk ${scheme}${host}/${URL_PATH} -o /dev/null
-    done <<< $(oc get route -n http-scale-${termination} --no-headers | awk '{print $2}')
+    done < /tmp/temp-route.txt
   done
 }

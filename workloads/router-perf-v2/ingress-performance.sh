@@ -1,5 +1,5 @@
 #!/usr/bin/bash -e
-set -e
+set -exv
 
 . common.sh
 

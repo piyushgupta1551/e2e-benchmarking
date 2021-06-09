@@ -8,7 +8,7 @@ metadata:
 spec:
   nodeSelector: {{.nodeSelector}}
   containers:
-  - image: quay.io/openshift-scale/nginx
+  - image: quay.io/piyushgupta1551/nginx:latest
     name: nginx
   dnsPolicy: ClusterFirst
   restartPolicy: Always
