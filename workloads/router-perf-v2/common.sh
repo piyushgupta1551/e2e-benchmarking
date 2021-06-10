@@ -18,13 +18,13 @@ NUM_NODES=$(oc get node -l node-role.kubernetes.io/worker --no-headers | grep -c
 export TLS_REUSE=${TLS_REUSE:-true}
 export UUID=$(uuidgen)
 export RUNTIME=${RUNTIME:-60}
-#export ES_SERVER=${ES_SERVER:-https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443}
-#export ES_INDEX=${ES_INDEX:-router-test-results}
+export ES_SERVER=${ES_SERVER:-https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443}
+export ES_INDEX=${ES_INDEX:-router-test-results}
 export HOST_NETWORK=${HOST_NETWORK:-true}
 export KUBECONFIG=${KUBECONFIG:-~/.kube/config}
 export NODE_SELECTOR=${NODE_SELECTOR:-'{node-role.kubernetes.io/workload: }'}
 export NUMBER_OF_ROUTERS=${NUMBER_OF_ROUTERS:-2}
-#export CERBERUS_URL=${CERBERUS_URL}
+export CERBERUS_URL=${CERBERUS_URL}
 export SERVICE_TYPE=${SERVICE_TYPE:-ClusterIP}
 
 if [[ ${COMPARE_WITH_GOLD} == "true" ]]; then
@@ -184,7 +184,7 @@ gen_mb_mix_config(){
       local scheme=https
       local port=443
     fi
-    oc get route -n http-scale-${termination} --no-headers | awk '{print $2}' > /tmp/temp-route-mb-mix.txt
+    oc get route -n http-scale-${mix_termination} --no-headers | awk '{print $2}' > /tmp/temp-route-mb-mix.txt
     while IFS="\n" read host; do
       if [[ ${first} == "true" ]]; then
           echo "{"

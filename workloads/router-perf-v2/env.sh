@@ -9,10 +9,10 @@ export HOST_NETWORK=true
 export NUMBER_OF_ROUTERS=2
 export NODE_SELECTOR='{node-role.kubernetes.io/workload: }'
 export QUIET_PERIOD=60s
-#export ES_SERVER=https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443
-#export ES_INDEX=router-test-results
+export ES_SERVER=https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443
+export ES_INDEX=router-test-results
 export PREFIX=$(oc get clusterversion version -o jsonpath="{.status.desired.version}")
-#export ES_SERVER_BASELINE=""
+export ES_SERVER_BASELINE=""
 export SMALL_SCALE_BASELINE_UUID=""
 export LARGE_SCALE_BASELINE_UUID=""
 export SMALL_SCALE_BASELINE_PREFIX=""
