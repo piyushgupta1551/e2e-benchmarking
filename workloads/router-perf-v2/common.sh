@@ -5,9 +5,9 @@ INFRA_CONFIG=http-perf.yml
 KUBE_BURNER_IMAGE=quay.io/cloud-bulldozer/kube-burner:latest
 URL_PATH=${URL_PATH:-"1024.html"}
 TERMINATIONS=${TERMINATIONS:-"http edge passthrough reencrypt"}
-KEEPALIVE_REQUESTS=${KEEPALIVE_REQUESTS:-"0 1 50"}
+KEEPALIVE_REQUESTS=${KEEPALIVE_REQUESTS:-"0 1"}
 SAMPLES=${SAMPLES:-1}
-QUIET_PERIOD=${QUIET_PERIOD:-60s}
+QUIET_PERIOD=${QUIET_PERIOD:-30s}
 THROUGHPUT_TOLERANCE=${THROUGHPUT_TOLERANCE:-5}
 LATENCY_TOLERANCE=${LATENCY_TOLERANCE:-5}
 PREFIX=${PREFIX:-$(oc get clusterversion version -o jsonpath="{.status.desired.version}")}
@@ -17,7 +17,7 @@ NUM_NODES=$(oc get node -l node-role.kubernetes.io/worker --no-headers | grep -c
 
 export TLS_REUSE=${TLS_REUSE:-true}
 export UUID=$(uuidgen)
-export RUNTIME=${RUNTIME:-60}
+export RUNTIME=${RUNTIME:-10}
 export ES_SERVER=${ES_SERVER:-https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443}
 export ES_INDEX=${ES_INDEX:-router-test-results}
 export HOST_NETWORK=${HOST_NETWORK:-true}
@@ -53,8 +53,8 @@ get_scenario(){
   else
     log "Small scale scenario detected: #workers < ${LARGE_SCALE_THRESHOLD}"
     export NUMBER_OF_ROUTES=${SMALL_SCALE_ROUTES:-10}
-    CLIENTS=${SMALL_SCALE_CLIENTS:-"1 40 200"}
-    CLIENTS_MIX=${SMALL_SCALE_CLIENTS_MIX:-"1 20 80"}
+    CLIENTS=${SMALL_SCALE_CLIENTS:-"1 40"}
+    CLIENTS_MIX=${SMALL_SCALE_CLIENTS_MIX:-"1 20"}
     BASELINE_UUID=${SMALL_SCALE_BASELINE_UUID}
     BASELINE_PREFIX=${SMALL_SCALE_BASELINE_PREFIX:-baseline}
   fi
@@ -134,6 +134,7 @@ enable_ingress_operator(){
 cleanup_infra(){
   log "Deleting infrastructure"
   oc delete ns -l kube-burner-uuid=${UUID} --ignore-not-found
+  rm -f /tmp/temp-router*.txt
 }
 
 gen_mb_config(){
