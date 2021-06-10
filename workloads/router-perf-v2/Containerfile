@@ -3,7 +3,9 @@ RUN dnf install -y python3 git make libtool
 RUN git clone https://github.com/jmencak/mb.git
 RUN pushd mb && make
 
-FROM registry.access.redhat.com/ubi8:latest           
+FROM registry.access.redhat.com/ubi8:latest
+RUN dnf install -y --nodocs git python3 python3-pip gcc python3-devel gcc-c++ atlas-devel gcc-gfortran  && dnf clean all
 RUN dnf install -y python3 iproute procps-ng net-tools && dnf clean all
-RUN pip3 install elasticsearch numpy
+RUN python3 -m pip install --upgrade cython numpy
+RUN pip3 install elasticsearch
 COPY --from=builder /mb/mb /usr/bin/mb
